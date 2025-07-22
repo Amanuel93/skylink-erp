@@ -1,4 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, OneToMany } from 'typeorm';
+import { Tenant } from './tenant.entity';
+import { UserRole } from './userRole.entity';
+import { AuthToken } from './authToken.entity';
 
 @Entity()
 export class User {
@@ -12,7 +15,22 @@ export class User {
   email: string;
 
   @Column()
-  password: string;
+  password_hash: string;
+
+  @Column({ default: true })
+  is_active: boolean;
+
+  @Column({ nullable: true })
+  full_name: string;
+
+  @ManyToOne(() => Tenant, (tenant) => tenant.users)
+  tenant: Tenant;
+
+  @OneToMany(() => UserRole, (userRole: UserRole) => userRole.user)
+  userRoles: UserRole[];
+
+  @OneToMany(() => AuthToken, (authToken: AuthToken) => authToken.user)
+  authTokens: AuthToken[];
 
   @CreateDateColumn()
   createdAt: Date;

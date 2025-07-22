@@ -17,14 +17,14 @@ export class AuthService {
     const existing = await this.userRepository.findOne({ where: [{ username }, { email }] });
     if (existing) throw new ConflictException('Username or email already exists');
     const hash = await bcrypt.hash(password, 10);
-    const user = this.userRepository.create({ username, email, password: hash });
+    const user = this.userRepository.create({ username, email, password_hash: hash });
     await this.userRepository.save(user);
     return { id: user.id, username: user.username, email: user.email };
   }
 
   async validateUser(username: string, password: string): Promise<User> {
     const user = await this.userRepository.findOne({ where: { username } });
-    if (!user || !(await bcrypt.compare(password, user.password))) {
+    if (!user || !(await bcrypt.compare(password, user.password_hash))) {
       throw new UnauthorizedException('Invalid credentials');
     }
     return user;
